@@ -1,5 +1,6 @@
 import uuid
 import json
+import os
 from datetime import datetime
 import threading
 
@@ -15,7 +16,26 @@ def generar_id():
     """
     return str(uuid.uuid4())
 
-def registrar_operacion(operacion, parametros, resultado):
+def guardar_historial(operacion_obj):
+    # Usar threading.Lock para evitar problemas de concurrencia al acceder al archivo
+
+    # Comprobamos si el archivo existe
+    if os.path.exists('historial.json'):
+        # Si existe, leemos el contenido
+        with open('historial.json', 'r') as file:
+            historial = json.load(file)
+    else:
+        # Si no existe, inicializamos una lista vacía
+        historial = []
+
+    # Agregamos la nueva operación al historial
+    historial.append(operacion_obj)
+
+    # Guardamos el historial actualizado en el archivo
+    with open('historial.json', 'w') as file:
+        json.dump(historial, file, indent=4)
+
+def registrar_operacion(operacion, a, b, resultado):
     """
     Registra una operación en el archivo 'historial.json'.
 
@@ -38,27 +58,15 @@ def registrar_operacion(operacion, parametros, resultado):
         "id": operacion_id,
         "timestamp": timestamp,
         "operacion": operacion,
-        "parametros": parametros,
+        "parametros": {"a": a, "b": b},
         "resultado": resultado
     }
 
-    # Usar threading.Lock para evitar problemas de concurrencia al acceder al archivo
-    with lock:
-        # Intentar leer el historial desde el archivo 'historial.json'
-        try:
-            with open('historial.json', 'r') as file:
-                historial = json.load(file)
-        except FileNotFoundError:
-            historial = []  # Si el archivo no existe, inicializamos como lista vacía
+    # Guardar la operación en el historial
+    guardar_historial(operacion_obj)
 
-        # Agregar la nueva operación al historial
-        historial.append(operacion_obj)
-
-        # Guardar el historial actualizado en el archivo 'historial.json'
-        with open('historial.json', 'w') as file:
-            json.dump(historial, file, indent=4)
-
-    print(f"Operación registrada: {operacion_obj}")
+    # Retornar el objeto de la operación registrada
+    return operacion_obj
 
 # Funciones para operaciones
 
@@ -76,7 +84,7 @@ def sumar(a, b):
     """
     resultado = a +b
 
-    registrar_operacion("sumar", {"a": a, "b": b}, resultado)
+    # registrar_operacion("sumar", a, b, resultado)
 
     return resultado
 
