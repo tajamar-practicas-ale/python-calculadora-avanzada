@@ -1,26 +1,44 @@
-import React from 'react'
+// src/components/Historial.jsx
+import { useEffect, useState } from "react";
+import axios from "axios";
 
-const Historial = () => {
+export default function Historial() {
+    const [historial, setHistorial] = useState([]);
+
+    const obtenerHistorial = async () => {
+        const { data } = await axios.get("http://localhost:5000/historial");
+        setHistorial(data);
+    };
+
+    const limpiarHistorial = async () => {
+        await axios.delete("http://localhost:5000/historial");
+        obtenerHistorial();
+    };
+
+    useEffect(() => {
+        obtenerHistorial();
+    }, []);
+
     return (
-        <section className='bg-purple-100 p-5 rounded-2xl border shadow-xl'>
-            <table>
-                <thead className='border-b bg-purple-400 rounded-tr-xl rounded-tl-xl'>
-                    <th className='p-2 px-3'>Fecha</th>
-                    <th className='p-2 px-3'>Operación</th>
-                    <th className='p-2 px-3'>Parámetro</th>
-                    <th className='p-2 px-3'>Resultado</th>
-                </thead>
-                <tbody>
-                    <tr className='border-b'>
-                        <td className='p-2 px-3 text-center'>asdasd</td>
-                        <td className='p-2 px-3 text-center'>asdasd</td>
-                        <td className='p-2 px-3 text-center'>asdasd</td>
-                        <td className='p-2 px-3 text-center'>asdasd</td>
-                    </tr>
-                </tbody>
-            </table >
-        </section >
-    )
+        <div className="p-4 bg-white rounded shadow border">
+            <div className="flex justify-between items-center mb-2">
+                <h2 className="text-xl font-bold">Historial</h2>
+                <button
+                    onClick={limpiarHistorial}
+                    className="bg-red-500 text-white px-3 py-1 rounded"
+                >
+                    Limpiar
+                </button>
+            </div>
+            <ul className="text-sm space-y-1">
+                {historial.length === 0 && <li>No hay operaciones registradas.</li>}
+                {historial.map((h) => (
+                    <li key={h.id}>
+                        <strong>{h.operacion}</strong>: {h.parametros.a} y {h.parametros.b} →{" "}
+                        {h.resultado} ({new Date(h.timestamp).toLocaleString()})
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
 }
-
-export default Historial

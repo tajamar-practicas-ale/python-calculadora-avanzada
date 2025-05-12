@@ -1,148 +1,59 @@
+# calculos.py
 import uuid
 import json
-import os
-from datetime import datetime
 import threading
+from datetime import datetime
 
-# Crear un Lock para manejar la concurrencia
-lock = threading.Lock()
+historial_lock = threading.Lock()
 
-def generar_id():
-    """
-    Genera un identificador único (UUID) para la operación.
+class ErrorCalculo(Exception):
+    """Excepción personalizada para errores de cálculo."""
+    def __init__(self, mensaje):
+        super().__init__(mensaje)
+        self.mensaje = mensaje
 
-    Retorna:
-    str: El UUID generado como una cadena de caracteres.
-    """
-    return str(uuid.uuid4())
-
-def guardar_historial(operacion_obj):
-    # Usar threading.Lock para evitar problemas de concurrencia al acceder al archivo
-
-    # Comprobamos si el archivo existe
-    if os.path.exists('historial.json'):
-        # Si existe, leemos el contenido
-        with open('historial.json', 'r') as file:
-            historial = json.load(file)
-    else:
-        # Si no existe, inicializamos una lista vacía
-        historial = []
-
-    # Agregamos la nueva operación al historial
-    historial.append(operacion_obj)
-
-    # Guardamos el historial actualizado en el archivo
-    with open('historial.json', 'w') as file:
-        json.dump(historial, file, indent=4)
-
-def registrar_operacion(operacion, a, b, resultado):
-    """
-    Registra una operación en el archivo 'historial.json'.
-
-    Esta función guarda el ID único, la fecha y hora, la operación realizada,
-    los parámetros de la operación y el resultado.
-
-    Parámetros:
-    operacion (str): El nombre de la operación (ej: 'sumar', 'restar').
-    parametros (dict): Un diccionario con los parámetros utilizados en la operación.
-    resultado (int/float): El resultado de la operación realizada.
-    """
-    # Generar un ID único para la operación
-    operacion_id = generar_id()
-
-    # Obtener la fecha y hora actual en formato ISO 8601
-    timestamp = datetime.utcnow().isoformat() + "Z"  # UTC + formato ISO 8601
-
-    # Crear el objeto que representa la operación
-    operacion_obj = {
-        "id": operacion_id,
-        "timestamp": timestamp,
+def registrar_historial(operacion, a, b, resultado):
+    entrada = {
+        "id": str(uuid.uuid4()),
+        "timestamp": datetime.utcnow().isoformat() + "Z",
         "operacion": operacion,
         "parametros": {"a": a, "b": b},
         "resultado": resultado
     }
+    with historial_lock:
+        try:
+            with open("historial.json", "r", encoding="utf-8") as f:
+                historial = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            historial = []
 
-    # Guardar la operación en el historial
-    guardar_historial(operacion_obj)
+        historial.append(entrada)
 
-    # Retornar el objeto de la operación registrada
-    return operacion_obj
-
-# Funciones para operaciones
+        with open("historial.json", "w", encoding="utf-8") as f:
+            json.dump(historial, f, indent=2)
 
 def sumar(a, b):
-    """
-    Esta función recibe dos valores como parámetro
-    y devuelve la suma de estos.
-
-    Parámetros:
-    a (int o float): Primer número.
-    b (int o float): Segundo número.
-
-    Retorna:
-    resultado: La suma de estos.
-    """
-    resultado = a +b
-
-    # registrar_operacion("sumar", a, b, resultado)
-
+    """Retorna la suma de a y b."""
+    resultado = a + b
+    registrar_historial("sumar", a, b, resultado)
     return resultado
 
 def restar(a, b):
-    """
-    Esta función recibe dos valores como parámetro
-    y devuelve la resta de estos.
-
-    Parámetros:
-    a (int o float): Primer número.
-    b (int o float): Segundo número.
-
-    Retorna:
-    resultado: La resta de estos.
-    """
+    """Retorna la resta de a y b."""
     resultado = a - b
-
-    registrar_operacion("restar", {"a": a, "b": b}, resultado)
-
+    registrar_historial("restar", a, b, resultado)
     return resultado
 
 def multiplicar(a, b):
-    """
-    Esta función recibe dos valores como parámetro
-    y devuelve el producto de estos.
-
-    Parámetros:
-    a (int o float): Primer número.
-    b (int o float): Segundo número.
-
-    Retorna:
-    int o float: el producto de estos.
-    """
+    """Retorna el producto de a y b."""
     resultado = a * b
-
-    registrar_operacion("multiplicación", {"a":a, "b":b}, resultado)
-
+    registrar_historial("multiplicar", a, b, resultado)
     return resultado
 
 def dividir(a, b):
-    """
-    Esta función recibe dos valores como parámetro,
-    verfica que el divisor no sea 0, de lo contrario, muestra un mensaje de error
-    y devuelve el cociente de estos.
-
-    Parámetros:
-    a (int o float): Primer número.
-    b (int o float): Segundo número.
-
-    Retorna:
-    int o float: el cociente de estos.
-    """
+    """Retorna la división de a entre b. Lanza ErrorCalculo si b = 0."""
     if b == 0:
-        raise ZeroDivisionError("Error de cálculo, división por cero no permitida")
-    else:
-        resultado = a /b
-
-        registrar_operacion("división", {"a":a, "b":b}, resultado)
-
-        return resultado
-
+        raise ErrorCalculo("División por cero no permitida")
+    resultado = a / b
+    registrar_historial("dividir", a, b, resultado)
+    return resultado

@@ -1,0 +1,12 @@
+[
+  {
+    "id": "e53b2795-936a-43ca-a6bd-452295f5e341",
+    "timestamp": "2025-05-12T23:30:29.553237Z",
+    "operacion": "sumar",
+    "parametros": {
+      "a": 0,
+      "b": 0
+    },
+    "resultado": 0
+  }
+]
