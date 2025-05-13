@@ -1,12 +1,22 @@
 [
   {
-    "id": "e53b2795-936a-43ca-a6bd-452295f5e341",
-    "timestamp": "2025-05-12T23:30:29.553237Z",
+    "id": "5a363ca7-6f4a-46e2-91a0-ca51610e23ac",
+    "timestamp": "2025-05-13T11:04:35.178674Z",
+    "operacion": "multiplicar",
+    "parametros": {
+      "a": 2,
+      "b": 2
+    },
+    "resultado": 4
+  },
+  {
+    "id": "93ce30b0-93b2-4c13-8515-77a6b896e053",
+    "timestamp": "2025-05-13T11:05:16.300501Z",
     "operacion": "sumar",
     "parametros": {
-      "a": 0,
-      "b": 0
+      "a": 1,
+      "b": 2
     },
-    "resultado": 0
+    "resultado": 3
   }
 ]

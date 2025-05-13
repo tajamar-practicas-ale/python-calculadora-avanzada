@@ -2,22 +2,31 @@
 import { useState } from "react";
 import axios from "axios";
 
-export default function Calculadora() {
+export default function Calculadora({ calc }) {
     const [a, setA] = useState("");
     const [b, setB] = useState("");
     const [operacion, setOperacion] = useState("sumar");
     const [resultado, setResultado] = useState(null);
     const [error, setError] = useState("");
 
+    // Evitar que se ingrese valores que no sean numéricos y que se calcule sin valores
+    const esValido = !isNaN(a) && !isNaN(b) && a !== "" && b !== "";
+
     const calcular = async () => {
+        // if (!esValido) return;
+
         try {
             const { data } = await axios.post("http://localhost:5000/calcular", {
-                a: Number(a),
-                b: Number(b),
+                a: parseFloat(a),
+                b: parseFloat(b),
                 operacion,
             });
+            console.log("Respuesta del backend:", data);
             setResultado(data.resultado);
             setError("");
+
+            // Llamar a la función para actualizar el historial
+            if (calc) calc();
         } catch (err) {
             setError(err.response?.data?.error || "Error al calcular");
         }
@@ -53,7 +62,9 @@ export default function Calculadora() {
                     placeholder="Segundo número"
                     required
                 />
-                <button onClick={calcular} className="bg-blue-500 text-white px-4 py-2 rounded w-30">
+                <button onClick={calcular} className={`px-4 py-2 rounded transition-colors ${esValido
+                    ? "bg-blue-500 hover:bg-blue-600 text-white cursor-pointer"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"}`} disabled={!esValido}>
                     Calcular
                 </button>
             </div>

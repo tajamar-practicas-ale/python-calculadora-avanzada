@@ -1,31 +1,19 @@
 // src/components/Historial.jsx
-import { useEffect, useState } from "react";
 import axios from "axios";
 
-export default function Historial() {
-    const [historial, setHistorial] = useState([]);
-
-    const obtenerHistorial = async () => {
-        const { data } = await axios.get("http://localhost:5000/historial");
-        setHistorial(data);
-    };
-
-    const limpiarHistorial = async () => {
+export default function Historial({ historial, limpiarHistorial }) {
+    const borrarHistorial = async () => {
         await axios.delete("http://localhost:5000/historial");
-        obtenerHistorial();
+        limpiarHistorial();
     };
-
-    useEffect(() => {
-        obtenerHistorial();
-    }, []);
 
     return (
-        <div className="p-4 bg-white rounded shadow border">
+        <div className="p-4 bg-white rounded-xl shadow border">
             <div className="flex justify-between items-center mb-2">
                 <h2 className="text-xl font-bold">Historial</h2>
                 <button
-                    onClick={limpiarHistorial}
-                    className="bg-red-500 text-white px-3 py-1 rounded"
+                    onClick={borrarHistorial}
+                    className="bg-red-500 text-white cursor-pointer hover:bg-red-600 transition-colors duration-200 px-3 py-1 rounded"
                 >
                     Limpiar
                 </button>

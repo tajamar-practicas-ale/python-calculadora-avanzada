@@ -2,7 +2,7 @@
 import { useState } from "react";
 import axios from "axios";
 
-export default function RegistroUsuario() {
+export default function RegistroUsuario({ users }) {
     const [form, setForm] = useState({ nombre: "", email: "", saldo: "" });
     const [mensaje, setMensaje] = useState("");
 
@@ -15,13 +15,15 @@ export default function RegistroUsuario() {
             });
             setMensaje(data.mensaje);
             setForm({ nombre: "", email: "", saldo: "" });
+
+            users();
         } catch (err) {
             setMensaje(err.response?.data?.error || "Error al registrar");
         }
     };
 
     return (
-        <div className="p-4 bg-white border rounded shadow">
+        <div className="p-4 bg-white border rounded-xl shadow">
             <h2 className="text-xl font-bold mb-2">Registro de Usuario</h2>
             <form onSubmit={handleSubmit} className="space-y-2">
                 <input
@@ -44,7 +46,7 @@ export default function RegistroUsuario() {
                     value={form.saldo}
                     onChange={(e) => setForm({ ...form, saldo: e.target.value })}
                 />
-                <button className="bg-green-500 text-white px-4 py-2 rounded" type="submit">
+                <button className="bg-green-500 hover:bg-green-600 transition-colors duration-200 cursor-pointer text-white px-4 py-2 rounded" type="submit">
                     Registrar
                 </button>
                 {mensaje && <p className="text-sm mt-2">{mensaje}</p>}
